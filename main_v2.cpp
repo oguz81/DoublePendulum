@@ -1,9 +1,9 @@
 //Double Pendulum.  13.02.2022
-//This is simulation of double pendulum.
+//This is the simulation of double pendulum.
 //Equations of motion of pendulumus were obtained by using Lagrangian dynamics.
 //Differential equations of motion are solved numerically with Runge-Kutta 4 method.
 //ouz81 made this.
-//ouz81 was here. ouz81 is still here. He's watching por...porsche races. That's right!
+//ouz81 was here. ouz81 is still here. He's watching por... porsche races. That's right!
 
 #include <stdio.h>
 #include <iostream>
@@ -18,12 +18,13 @@
 GLFWwindow* window;
 
 #define PI 3.141592   //Holy Pi!
-#define h 0.005       //step length for Runge-Kutta
+#define h 0.025       //step length for Runge-Kutta
 #define g 9.81        //gravity
 #define R 1           //length of rods
 
 //Initial angle and velocity for pendulum 1
-#define THETA1_0 3.0f
+//Initial values can be assigned with any number.
+#define THETA1_0 3.0f 
 #define OMEGA1_0 0
 
 //Initial angle and velocity for pendulum 2
@@ -38,7 +39,11 @@ class Pendulum{
 		void drawRod(float);
 		float angle;
 };
-
+/*
+There are two functions below: drawCircle and drawRod.
+Both of them have the parameter "distance".
+This parameter is used to place the drawing in the y(vertical) axis. 
+*/
 void Pendulum::drawCircle(float distance){
     int corner_one, corner_two, corner_three;//corners of triangles. GL_TRIANGLES starts to draw counterclockwise.
     corner_one = -6;
@@ -81,13 +86,13 @@ float theta_2 = THETA2_0;
 float omega_2 = OMEGA2_0;
 float m1 = 2;
 float m2 = 2; //masses of pendulums
-float L1 = 1;
-float L2 = 1; //rod lengths
+float L1 = R;
+float L2 = R; //rod lengths
 
 
 //***PENDULUM 1****
 
-float k1, k2, k3, k4, l1, l2, l3, l4;
+float k1, k2, k3, k4, l1, l2, l3, l4;  //variables for Runge-Kutta  
 
 float f_1(float omg){
 	return omg;
@@ -106,7 +111,7 @@ float g_1(float theta1, float theta2, float omg1, float omg2){
 
 //***PENDULUM 2****
 
-float p1, p2, p3, p4, q1, q2, q3, q4;
+float p1, p2, p3, p4, q1, q2, q3, q4;   //variables for Runge-Kutta
 
 float f_2(float omg){
 	return omg;
@@ -158,8 +163,8 @@ int main(void){
     pendulum1.drawCircle(0.0f);
     pendulum1.drawRod(0.0f);
     Pendulum pendulum2;
-    pendulum2.drawCircle(0.4f);
-    pendulum2.drawRod(0.4f);
+    pendulum2.drawCircle(0.4f); //0.4 units down in y axis
+    pendulum2.drawRod(0.4f);    //0.4 units down in y axis
 
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     glClearColor(1.0f, 0.8f, 0.0f, 0.0f);
@@ -210,13 +215,10 @@ int main(void){
 
     do{
 
-    	
-
     	glClear(GL_COLOR_BUFFER_BIT);
     	glUseProgram(shaderProgram);
 
-    	
-
+        //Runge-Kutta 4 starts here.
         k1 = h * f_1(omega_1);
         l1 = h * g_1(theta_1, theta_2, omega_1, omega_2);
         p1 = h * f_2(omega_2);
@@ -225,7 +227,7 @@ int main(void){
         k2 = h * f_1(omega_1 + (0.5 * l1));
         l2 = h * g_1(theta_1 + (0.5 * k1), theta_2 + (0.5 * p1), omega_1 + (0.5 * l1), omega_2 + (0.5 * q1));
         p2 = h * f_2(omega_2 + (0.5 * q1));
-        q2 = h * g_2(theta_1 + (0.5 * k1), theta_2 + (0.5 * p1), omega_1  + (0.5 * l1), omega_2 + (0.5 * q1));
+        q2 = h * g_2(theta_1 + (0.5 * k1), theta_2 + (0.5 * p1), omega_1 + (0.5 * l1), omega_2 + (0.5 * q1));
         
         k3 = h * f_1(omega_1 + (0.5 * l2));
         l3 = h * g_1(theta_1 + (0.5 * k2), theta_2 + (0.5 * p2), omega_1 + (0.5 * l2), omega_2 + (0.5 * q2));
@@ -239,19 +241,20 @@ int main(void){
 
         theta_1 = theta_1 + (k1 + (2 * k2) + (2 * k3) + k4) / 6;
         omega_1 = omega_1 + (l1 + (2 * l2) + (2 * l3) + l4) / 6;         
-        //Below two lines keep the theta in range of -2PI to 2PI.
+        //Below two lines keep the theta_1 in range of -2PI to 2PI.
         if(theta_1 > 2 * PI) theta_1 = theta_1 - (2 * PI);
         if(theta_1 < -2 * PI) theta_1 = theta_1 + (2 * PI);
         
 
         theta_2 = theta_2 + (p1 + (2 * p2) + (2 * p3) + p4) / 6;
         omega_2 = omega_2 + (q1 + (2 * q2) + (2 * q3) + q4) / 6;
-        //Below two lines keep the theta in range of -2PI to 2PI.
+        //Below two lines keep the theta_2 in range of -2PI to 2PI.
         if(theta_2 > 2 * PI) theta_2 = theta_2 - (2 * PI);
         if(theta_2 < -2 * PI) theta_2 = theta_2 + (2 * PI);
 
-        pendulum1.angle = theta_1 * 180 / PI;
+        pendulum1.angle = theta_1 * 180 / PI; //converts theta_1 from radian to degree
 
+        //prepares to draw pendulum 1
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
         glm::mat4 view = glm::mat4(1.0f);
@@ -269,13 +272,12 @@ int main(void){
 
         pendulum2.angle = theta_2 * 180 / PI;
 
+        //prepares to draw pendulum 2
         glm::mat4 model2 = glm::mat4(1.0f);
         glm::mat4 projection2 = glm::mat4(1.0f);
         glm::mat4 view2 = glm::mat4(1.0f);
-        view2 = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f));
+        view2 = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f)); //"view" parameter is here for binding the pendulum 2 to 1.
         view2 = glm::rotate(view2, glm::radians(pendulum2.angle - pendulum1.angle), glm::vec3(0.0f, 0.0f, 1.0f));
-        
-        
         
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection2));
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view2));
