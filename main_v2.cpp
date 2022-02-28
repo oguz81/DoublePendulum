@@ -104,11 +104,6 @@ float g_1(float theta1, float theta2, float omg1, float omg2){
      - ((m1 + m2) * g *sin(theta1))) / (L1 * (m1 + (m2 * sin(theta1 - theta2) * sin(theta1 - theta2)))); 
 }
 
-/*float g_1(float theta1, float theta2, float omg1, float omg2){
-	return (-m2 * L2 * (omg2 * omg2) * sin(theta1 - theta2) - (g * sin(theta1) * (m1 + m2)) - (m2 * L2 * omg2 * cos(theta1 - theta2))) /
-	                                                           (L1 * (m1 + m2));
-}*/
-
 //***PENDULUM 2****
 
 float p1, p2, p3, p4, q1, q2, q3, q4;   //variables for Runge-Kutta
@@ -123,10 +118,6 @@ float g_2(float theta1, float theta2, float omg1, float omg2){
             + (m2 * L2 * omg2 * omg2 * sin(theta1 - theta2) * cos(theta1 - theta2))) / (L2 * (m1 + (m2 * sin(theta1 - theta2) * sin(theta1 - theta2))));
 }
 
-/*float g_2(float theta1, float theta2, float omg1, float omg2){
-	return (L1 * omg1 * omg1 * sin(theta1 - theta2) - (g * sin(theta2)) - (L1 * omg1 * cos(theta1 - theta2))) /
-	                                                              L2;
-}*/
 
 int main(void){
 	if( !glfwInit() )
