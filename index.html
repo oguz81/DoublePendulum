@@ -4,6 +4,10 @@
 		<link rel = "icon" href = "https://oguz81.github.io/githubavatar.png">
 	</head>
 	<head>
+	<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+</head>
+	<head>
 		<title>oguz81---->Double Pendulum (C++, OpenGL)</title>
 		<meta name = "keywords" content = "Double Pendulum, Simulation, C++, OpenGL"/>
 		<meta name = "description" content = "Double Pendulum with C++ and OpenGL"/>
@@ -13,8 +17,500 @@
 	<body>
 		<p align = "left"><a href = "https://oguz81.github.io/" target = "_self">Home</a></p>	
 	</body>
+	<head>
+		<style>
+			.div1{
+				max-width: 1000px;
+				min-width: 100px;
+			}
+		</style>
+	</head>
+	<head>
+		<style>
+			.divc{
+				max-width: 1000px;
+				min-width: 100px;
+				font-size: 15px;
+				background-color: silver;
+			}
+		</style>
+	</head>
 	<body>
-		<h1>under construction, sorry.</h1>
-		<p>While I am working for this page, you can take a look at the source code of this study <a href = "https://github.com/oguz81/DoublePendulum" target = "_self">here</a>, or listen to some blues from Stevie Ray Vaughan<a href = "https://www.youtube.com/watch?v=Xy38VCMn81I" target = "_self"> here.</a></p>
+		<body><p>Published first</p></body>
+		<div class = "div1">
+		<h1>Double Pendulum (C++, OpenGL)</h1>
+		<p>This is a mini tutorial for making double pendulum with C++ and OpenGL. You can look into the GitHub repository for source code <a href = "https://github.com/oguz81/DoublePendulum" target = "_self">here</a>, or watch it on <a href = "https://www.youtube.com/watch?v=18C2wXKuh8E" target = "_self"> YouTube.</a></p>
+
+		<p><b>Prerequistes</b></p>
+		<p>C++, OpenGL, Differential Equations, Runge-Kutta methods -or generally numerical methods for ordinary differential equations, Lagrangian mechanics.</p><br \><br \>
+
+		<p>OpenGL version 3.30</p>
+		<h1>1 The Equations of Motion</h1>
+		<p>We will use Lagrangian mechanics to obtain the equations of motion of the system. First, let's draw the system.</p>
+		<p><img src = "doublependulum2.png"></p>
+		<p>Now, we write x and y coordinates of both pendulum balls and start to derive the equations of motion.</p>
+		<p>T : kinetic energy</p>
+		<p>U : potential energy</p>
+		<p>L : Lagrangian (L = T - U)</p>
+		<p><i><u>For m</u><sub>1</sub></i></p>
+		<p>\begin{align*}
+x_1 &= l_1\sin{\theta_1}\\
+y_1 &= -l_1\cos{\theta_1}\\
+\dot{x_1} &= l_1\dot{\theta_1}\cos{\theta_1}\\
+\dot{y_1} &= l_1\dot{\theta_1}\sin{\theta_1}\\ \\
+T_1 &= \frac{1}{2}m_1(\dot{x_1}^2 + \dot{y_1}^2)\\ \\
+&= \frac{1}{2}m_1l_1^2\dot{\theta_1}^2\\ \\
+U_1 &= -m_1gl_1\cos{\theta_1}
+\end{align*}</p>
+<p><i><u>For m<sub>2</sub></u></i></p>
+<p>\begin{align*}
+x_2 &= l_1\sin{\theta_1} + l_2\sin{\theta_2}\\
+y_2 &= -l_1\cos{\theta_1} - l_2\cos{\theta_2}\\
+\dot{x_2} &= l_1\dot{\theta_1}\cos{\theta_1} + l_2\dot{\theta_2}\cos{\theta_2}\\
+\dot{y_2} &= l_1\dot{\theta_1}\sin{\theta_1} + l_2\dot{\theta_2}\sin{\theta_2}\\
+T_2 &= \frac{1}{2}m_2(\dot{x_2}^2 + \dot{y_2}^2)\\
+&= \frac{1}{2}m_2(l_1^2\dot{\theta_1}^2 + l_2^2\dot{\theta_2}^2 + 2l_1l_2\dot{\theta_1}\dot{\theta_2}\cos{(\theta_1 - \theta_2)})\\
+U_2 &= - m_2gl_1\cos{\theta_1} - m_2gl_2\cos{\theta_2}\\ \\ 
+\end{align*}</p>
+
+<p>Kinetic energy of the system;
+\begin{align*}
+T &= T_1 + T_2\\
+&=\frac{1}{2}(m_1l_1^2\dot{\theta_1}^2 + m_2l_1^2\dot{\theta_1}^2 + m_2l_2^2\dot{\theta_2}^2) + m_2l_1l_2\dot{\theta_1}\dot{\theta_2}\cos{(\theta_1 - \theta_2)} 
+\end{align*}
+Potential energy of the system;
+\begin{align*}
+U &= U_1 + U_2\\
+&= -m_1gl_1\cos{\theta_1} - m_2gl_1\cos{\theta_1} - m_2gl_2\cos{\theta_2}
+\end{align*}
+The system has two generalized coordinates: &#x3B8<sub>1</sub> and &#x3B8<sub>2</sub>. Therefore we have two Euler-Lagrange equations for both of coordinates. For &#x3B8<sub>1</sub>;
+\begin{align}
+\frac{\partial L}{\partial \theta_1} - \frac{d}{dt}\frac{\partial L}{\partial \dot{\theta_1}} = 0 \qquad (1)
+\end{align}
+and for &#x3B8<sub>2</sub>;
+\begin{align}
+\frac{\partial L}{\partial \theta_2} - \frac{d}{dt}\frac{\partial L}{\partial \dot{\theta_2}} = 0 \qquad (2)
+\end{align}
+Let's obtain the Lagrangian of the system.
+\begin{align*}
+L &= T - U\\
+&= \frac{1}{2}(m_1l_1^2\dot{\theta_1}^2 + m_2l_1^2\dot{\theta_1}^2 + m_2l_2^2\dot{\theta_2}^2) + m_2l_1l_2\dot{\theta_1}\dot{\theta_2}\cos{(\theta_1 - \theta_2)}\\ &+ m_1gl_1\cos{\theta_1} + m_2gl_1\cos{\theta_1} + m_2gl_2\cos{\theta_2}\\ \\
+\end{align*}
+For equation (1):
+\begin{align*}
+\frac{\partial L}{\partial \theta_1} &= -m_2l_1l_2\dot{\theta_1}\dot{\theta_2}\sin{(\theta_1 - \theta_2)} - m_1gl_1\sin{\theta_1} - m_2gl_1\sin{\theta_1} \\ \\
+\frac{d}{dt}\frac{\partial L}{\partial \dot{\theta_1}} &= m_1l_1^2\ddot{\theta_1} + m_2l_1^2\ddot{\theta_1} + m_2l_1l_2\ddot{\theta_2}\cos{(\theta_1 - \theta_2)} - m_2l_1l_2\dot{\theta_2}(\dot{\theta_1} - \dot{\theta_2})\sin{(\theta_1 - \theta_2)}\\ \\
+\end{align*}
+After putting $$\frac{\partial L}{\partial \theta_1}$$ and $$\frac{d}{dt}\frac{\partial L}{\partial \dot{\theta_1}}$$ on equation (1) we obtain the equation of motion for &#x3B8<sub>1</sub>:
+\begin{align*}
+\ddot{\theta_1} = \frac{-m_2l_2\dot{\theta_2}^2\sin{(\theta_1 - \theta_2)} - g\sin{\theta_1}(m_1 + m_2) - m_2l_2\ddot{\theta_2}\cos{(\theta_1 - \theta_2)}}{l_1(m_1 + m_2)}\\ \\
+\end{align*}
+
+For equation (2):
+\begin{align*}
+\frac{\partial L}{\partial \theta_2} &= m_2l_1l_2\dot{\theta_1}\dot{\theta_2}\sin{(\theta_1 - \theta_2)} - m_2gl_2\sin{\theta_2}\\ \\
+\frac{d}{dt}\frac{\partial L}{\partial \dot{\theta_2}} &= m_2l_2^2\ddot{\theta_2} + m_2l_1l_2\ddot{\theta_1}\cos{(\theta_1 - \theta_2)} - m_2l_1l_2\dot{\theta_1}(\dot{\theta_1} - \dot{\theta_2})\sin{(\theta_1 - \theta_2)}\\ \\
+\end{align*}
+After putting the equations above on equation (2) we obtain the equation of the motion for &#x3B8<sub>2</sub>:
+\begin{align*}
+\ddot{\theta_2} = \frac{l_1\dot{\theta_1}^2\sin{(\theta_1 - \theta_2)} - g\sin{\theta_2} - l_1\ddot{\theta_1}\cos{(\theta_1 - \theta_2)}}{l_2}\\ \\
+\end{align*}
+We can say that &#x3C9 is angular momentum. Therefore;
+$$\dot{\theta_1} = \omega_1$$
+$$\ddot{\theta_1} = \dot{\omega_1}$$
+$$\dot{\theta_2} = \omega_2$$
+$$\ddot{\theta_2} = \dot{\omega_2}$$
+We rewrite the equations of motions.
+\begin{align}
+\dot{\omega_1} = \frac{-m_2l_2\omega_2^2\sin{(\theta_1 - \theta_2)} - g\sin{\theta_1}(m_1 + m_2) - m_2l_2\dot{\omega_2}\cos{(\theta_1 - \theta_2)}}{l_1(m_1 + m_2)} \qquad (3)
+\end{align}
+\begin{align}
+\dot{\omega_2} = \frac{l_1\omega_1^2\sin{(\theta_1 - \theta_2)} - g\sin{\theta_2} - l_1\dot{\omega_1}\cos{(\theta_1 - \theta_2)}}{l_2} \qquad (4)
+\end{align}
+Both of these equations have derivative terms in both sides of them. So we need to rearrange them. There must be derivative terms only on the left hand side to be able to solve them with Runge-Kutta.</p>
+<p>We assign the equation (3) to the <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <msub>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mover>
+        <mi>&#969</mi>
+        <mo>&#x02D9;<!-- ˙ --></mo>
+      </mover>
+    </mrow>
+    <mn>1</mn>
+  </msub>
+</math> in the equation (4) and assign the equation(4) to the <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <msub>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mover>
+        <mi>&#969</mi>
+        <mo>&#x02D9;<!-- ˙ --></mo>
+      </mover>
+    </mrow>
+    <mn>2</mn>
+  </msub>
+</math> in the equation (3). These operations give us the final form of the equations of motion which we use with Runge-Kutta.
+\begin{align}
+\dot{\omega_1} = \frac{m_2g\sin{\theta_2}\cos{(\theta_1 - \theta_2)} - m_2\sin{(\theta_1 - \theta_2)}[l_1\omega_1^2\cos{(\theta_1 - \theta_2)} + l_2\omega_2^2] - (m_1 + m_2)g\sin{\theta_1}}{l_1[m_1 + m_2\sin^2{(\theta_1 - \theta_2)}]} \qquad(5)
+\end{align}
+\begin{align}
+\dot{\omega_2} = \frac{(m_1 + m_2)[l_1\omega_1^2\sin{(\theta_1 -\theta_2)} - g\sin{\theta_2} + g\sin{\theta_1}\cos{(\theta_1 - \theta_2)}] + m_2l_2\omega_2^2\sin{(\theta_1 - \theta_2)\cos(\theta_1 -\theta_2)}}{l_2[m_1 + m_2\sin^2{(\theta_1 - \theta_2)}]} \qquad(6)
+\end{align}
+</p>
+<h1>2 Runge-Kutta Method</h1>
+<p>We use fourth-order Runge-Kutta method. Assume that we have a first order differential equation:
+\begin{equation}
+y'=f(x,y)
+\end{equation}
+with the initial condition <i>y(x<sub>0</sub>)=y<sub>0</sub></i>. If
+\begin{equation}
+y_n '=f(x_n,y_n)
+\end{equation}
+then
+\begin{equation}
+y_{n+1} = y_n+\frac{1}{6}(k_1 + 2k_2 + 2k_3 + k_4) .
+\end{equation}
+Here
+\begin{align*}
+k_1 &= hf(x_n , y_n)\\ % '&' sing is for aligning equations with '=' 
+k_2 &= hf(x_n + \frac{1}{2}h , y_n + \frac{1}{2}k_1)\\
+k_3 &= hf(x_n + \frac{1}{2}h , y_n+ \frac{1}{2}k_2)\\
+k_4 &= hf(x_n + h , y_n + k_3)
+\end{align*}
+
+h : step length <br \><br \>
+If a system has a second order differential equation then Runge-Kutta changes a bit. First, we describe the system with two-coupled first order differential equations.
+\begin{align}
+y' &= f(x,y,z) = z\\
+y'' &= g(x,y,z) = z'
+\end{align}
+Initial conditions are
+\begin{align*}
+y(x_0) &= y_0\\
+z(x_0) &= z_0
+\end{align*}
+Solutions of the differential equations are
+\begin{align}
+y_{n+1} &= y_n+\frac{1}{6}(k_1 + 2k_2 + 2k_3 + k_4)\\
+z_{n+1} &= z_n+\frac{1}{6}(l_1 + 2l_2 + 2l_3 + l_4)
+\end{align}
+and
+\begin{align*}
+k_1 & = hf(x_n, y_n, z_n)\\
+l_1 & = hg(x_n, y_n, z_n)\\
+k_2 & = hf(x_n + \frac{1}{2}h, y_n + \frac{1}{2}k_1, z_n + \frac{1}{2}l_1)\\
+l_2 & = hg(x_n + \frac{1}{2}h, y_n + \frac{1}{2}k_1, z_n + \frac{1}{2}l_1)\\
+k_3 & = hf(x_n + \frac{1}{2}h, y_n + \frac{1}{2}k_2, z_n + \frac{1}{2}l_2)\\
+l_3 & = hg(x_n + \frac{1}{2}h, y_n + \frac{1}{2}k_2, z_n + \frac{1}{2}l_2)\\
+k_4 & = hf(x_n + h, y_n + k_3, z_n + l_3)\\
+l_4 & = hg(x_n + h, y_n + k_3, z_n + l_3)
+\end{align*}</p>
+<h1>3 Double Pendulum</h1>
+<p>Let's describe our system.
+\begin{align*}
+\dot{\theta_1} &= \omega_1 = f_1(\omega_1)\\
+\ddot{\theta_1} &= \dot{\omega_1} = g_1(\theta_1, \theta_2, \omega_1, \omega_2)\\ \\
+\dot{\theta_2} &= \omega_2 = f_2(\omega_2)\\
+\ddot{\theta_2} &= \dot{\omega_2} = g_2(\theta_1, \theta_2, \omega_1, \omega_2)\\
+\end{align*}
+Solutions are:
+\begin{align*}
+\theta_{1(n+1)} &= \theta_{1n} + \frac{1}{6}(k_1 + 2k_2 + 2k_3 + k_4)\\
+\omega_{1(n+1)} &= \omega_{1n} + \frac{1}{6}(l_1 + 2l_2 + 2l_3 + l_4)\\
+\theta_{2(n+1)} &= \theta_{2n} + \frac{1}{6}(p_1 + 2p_2 + 2p_3 + p_4)\\
+\omega_{2(n+1)} &= \omega_{2n} + \frac{1}{6}(q_1 + 2q_2 + 2q_3 + q_4)\\ \\
+
+k_1 &= hf_1(\omega_1)\\
+l_1 &= hg_1(\theta_1, \theta_2, \omega_1, \omega_2)\\
+p_1 &= hf_2(\omega_2)\\
+q_1 &= hg_2(\theta_1, \theta_2, \omega_1, \omega_2)\\ \\
+k_2 &= hf_1(\omega_1 + \frac{1}{2}l_1)\\
+l_2 &= hg_1(\theta_1 + \frac{1}{2}k_1, \theta_2 + \frac{1}{2}p_1, \omega_1 + \frac{1}{2}l_1, \omega_2 + \frac{1}{2}q_1)\\
+p_2 &= hf_2(\omega_2 + \frac{1}{2}q_1)\\
+q_2 &= hg_2(\theta_1 + \frac{1}{2}k_1, \theta_2 + \frac{1}{2}p_1, \omega_1 + \frac{1}{2}l_1, \omega_2 + \frac{1}{2}q_1)\\ \\
+k_3 &= hf_1(\omega_1 + \frac{1}{2}l_2)\\
+l_3 &= hg_1(\theta_1 + \frac{1}{2}k_2, \theta_2 + \frac{1}{2}p_2, \omega_1 + \frac{1}{2}l_2, \omega_2 + \frac{1}{2}q_2)\\
+p_3 &= hf_2(\omega_2 + \frac{1}{2}q_2)\\
+q_3 &= hg_2(\theta_1 + \frac{1}{2}k_2, \theta_2 + \frac{1}{2}p_2, \omega_1 + \frac{1}{2}l_2, \omega_2 + \frac{1}{2}q_2)\\ \\
+k_4 &= hf_1(\omega_1 + l_3)\\
+l_4 &= hg_1(\theta_1 + k_3, \theta_2 + p_3, \omega_1 + l_3, \omega_2 + q_3)\\
+p_4 &= hf_2(\omega_2 + q_3)\\
+q_4 &= hg_2(\theta_1 + k_3, \theta_2 + p_3, \omega_1 + l_3, \omega_2 + q_3)\\
+\end{align*}
+</p>
+<h1>4 Drawing Double Pendulum</h1>
+<p>First, we draw a circle. We use GL_TRIANGLES, which is one of OpenGL primitives. GL_TRIANGLES needs three vertices to draw a triangle.</p>
+<p><img src="gltriangles.png"></p>
+<p>We need to draw 360 triangles around a point which is center of the circle. A triangle has three vertices and one vertex has two coordinates. So, we will have $$360\times3 = 1080$$ vertices and $$1080\times 2 = 2160$$ array elements.
+
+GL_TRIANGLES draws a triangle starting from first corner to third one. If we put first, fourth, seventh(n+3)... corners to the same point, these 360 triangles create a filled circle.</p>
+<div class="divc">
+	<p>
+		<pre>
+			<code>
+void Pendulum::drawCircle(float distance){
+    int corner_one, corner_two, corner_three;//corners of triangles. GL_TRIANGLES starts to draw counterclockwise.
+    corner_one = -6;
+    corner_two = -4;
+    corner_three = -2;
+
+    float radius = 0.025f;
+
+    for(int angle = 1; angle <= 360; angle ++){
+        corner_one = corner_one + 6;
+        corner_two = corner_two + 6;
+        corner_three = corner_three + 6;
+
+        circleVertices[corner_one] = 0.0f;
+        circleVertices[corner_one + 1] = 0.0f - distance;
+
+        circleVertices[corner_two] = radius * cos((angle -1) * 3.1416 / 180);
+        circleVertices[corner_two + 1] = radius * sin((angle -1) * 3.1416 / 180) - distance;
+
+        circleVertices[corner_three] = radius * cos((angle) * 3.1416 / 180);
+        circleVertices[corner_three + 1] = radius * sin((angle) * 3.1416 / 180) - distance;
+
+    }    
+}
+}
+			</code>
+		</pre>
+	</p>
+	</div>
+<p>We have <i>corner_one, corner_two, corner_three</i> variables. These are our corner vertices. We start them six step behind to avoid core dumped error at the end of the loop(If they start as corner_one = 0, corner_two = 2, corner_three = 4; the function tries to access some array members that bigger than 2160 and it causes core dumped error).</p>
+
+<p>In OpenGL, vertex coordinates are stored sequentially. Therefore we assign vertex coordinates of a corner as <i>circleVertices[corner_one]</i> and <i>circleVertices[corner_one +1]</i>. We also have to add '6' to corner vertices in every tour for assigning next vertices to the array.</p>
+
+<p><i>corner_one, corner_two</i> and <i>corner_three</i> are considered as x coordinates of vertices. So, they get values which are calculated with cosine. <i>corner_one +1, corner_two +1</i> and <i>corner_three +1</i> are considered as y coordinates and they get values calculated with sine.</p>
+<p>We have <i>distance</i> variable here. We use it for locating pendulums on coordinate system. In our study when we locate the lower pendulum, we assign <i>0.4f</i> to <i>distance</i> to locate the pendulum 0.4 unit below on the coordinate system. (Why 0.4? Because the length of the pendulums are 0.4f unit.If we locate one of pendulums 0.4f below, it seems just like they are binded to each other)</p>
+<p>When we draw the upper pendulum, we assign <i>0.0f</i> to <i>distance</i>.</p>
+<div class="divc">
+<p>
+	<pre>
+		<code>
+//creating pendulums
+Pendulum pendulum1;
+pendulum1.drawCircle(0.0f);
+pendulum1.drawRod(0.0f);
+Pendulum pendulum2;
+pendulum2.drawCircle(0.4f); //0.4 units down in y axis
+pendulum2.drawRod(0.4f);    //0.4 units down in y axis</code>
+	</pre>
+</p>
+</div>
+<p>After drawing pendulum balls, we draw the rods of the pendulums. We use GL_TRIANGLE_STRIP primitive.</p>
+<p><img src = "gltrianglestrip.png"></p>
+<p>The code below assigns vertex coordinates to the array.</p>
+<div class = "divc">
+<p>
+	<pre>
+		<code>
+void Pendulum::drawRod(float distance){
+	rodVertices[0] =		  -0.01f;	rodVertices[1] = 0.0f - distance;
+	rodVertices[2] = 		   0.01f;	rodVertices[3] = 0.0f - distance;
+	rodVertices[4] = 		   0.01f;	rodVertices[5] = 0.4f - distance;
+	rodVertices[6] = 		  -0.01f;	rodVertices[7] = 0.4f - distance;
+	rodVertices[8] =   		  -0.01f;	rodVertices[9] = 0.0f - distance;
+	
+}			
+		</code>
+	</pre>
+</p></div>
+<p>Each line represents one vertex which consists of x and y coordinates. Odd-numbered array elements represent x axis and even-numbered array elements represent y axis. Then GL_TRIANGLE_STRIP draws a rod. We have <i>distance</i> variable here again. We assign <i>0.0f</i> to <i>distance</i> for the upper pendulum and <i>0.4f</i> for the lower pendulum.</p>
+<h1>5 VAOs and VBO</h1>
+<p>We have four vertex array objects (two pendulums, two rods) and one vertex buffer object (one VBO to bind them all).</p>
+<div class = "divc">
+<p>
+	<pre>
+		<code>
+unsigned int VBO; // This vertex buffer object is common for both pendulum
+
+    //******PENDULUM1*******************
+    unsigned VAO, VAO2; //VAO is for circle, VAO2 is for the rod of pendulum
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pendulum1.circleVertices), pendulum1.circleVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    //setting rod vertices
+    glGenVertexArrays(1, &VAO2);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO2);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pendulum1.rodVertices), pendulum1.rodVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    //******PENDULUM2********************
+    unsigned VAO3, VAO4; //VAO3 is for circle, VAO4 is for the rod of pendulum
+    glGenVertexArrays(1, &VAO3);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO3);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pendulum2.circleVertices), pendulum2.circleVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    //setting rod vertices
+    glGenVertexArrays(1, &VAO4);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO4);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pendulum2.rodVertices), pendulum2.rodVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+		</code>
+	</pre>
+</p>
+	</div>
+	<h1>6 Maths in the Code</h1>
+<p>Let's remember the differential equations of the system. For pendulum 1:</p>
+<p>
+\begin{align*}
+\dot{\theta_1} &= f_1(\omega_1) = \omega_1\\ \\
+\dot{\omega_1} &= g_1(\theta_1, \theta_2, \omega_1, \omega_2) = \frac{m_2g\sin{\theta_2}\cos{(\theta_1 - \theta_2)} - m_2\sin{(\theta_1 - \theta_2)}[l_1\omega_1^2\cos{(\theta_1 - \theta_2)} + l_2\omega_2^2] - (m_1 + m_2)g\sin{\theta_1}}{l_1[m_1 + m_2\sin^2{(\theta_1 - \theta_2)}]}
+\end{align*}
+</p>
+<p>For pendulum 2:</p>
+<p>
+\begin{align*}
+\dot{\theta_2} &= f_2(\omega_2) = \omega_2 \\ \\
+\dot{\omega_2} &= g_2(\theta_1, \theta_2, \omega_1, \omega_2) = \frac{(m_1 + m_2)[l_1\omega_1^2\sin{(\theta_1 -\theta_2)} - g\sin{\theta_2} + g\sin{\theta_1}\cos{(\theta_1 - \theta_2)}] + m_2l_2\omega_2^2\sin{(\theta_1 - \theta_2)\cos(\theta_1 -\theta_2)}}{l_2[m_1 + m_2\sin^2{(\theta_1 - \theta_2)}]} 
+\end{align*}
+</p>
+Their C++ codes:
+<div class = "divc">
+	<p>
+		<pre>
+			<code>
+//***PENDULUM 1**** 
+
+float f_1(float omg){
+	return omg;
+}
+
+float g_1(float theta1, float theta2, float omg1, float omg2){
+    return ((m2 * g * sin(theta2) * cos(theta1 - theta2))
+     - (m2 * sin(theta1 - theta2) * (L1 * (omg1 * omg1) * cos(theta1 - theta2) + (L2 * (omg2 * omg2))))
+     - ((m1 + m2) * g *sin(theta1))) / (L1 * (m1 + (m2 * sin(theta1 - theta2) * sin(theta1 - theta2)))); 
+}
+
+//***PENDULUM 2****
+
+float f_2(float omg){
+	return omg;
+}
+
+float g_2(float theta1, float theta2, float omg1, float omg2){
+    return  ((m1 + m2) * (L1 * (omg1 * omg1) * sin(theta1 - theta2)
+            - (g * sin(theta2)) + (g * sin(theta1) * cos(theta1 - theta2)))
+            + (m2 * L2 * omg2 * omg2 * sin(theta1 - theta2) * cos(theta1 - theta2))) 
+            / (L2 * (m1 + (m2 * sin(theta1 - theta2) * sin(theta1 - theta2))));
+}
+			</code>
+		</pre>
+	</p>
+</div>
+<p>And Runge-Kutta</p>
+<div class = "divc">
+	<p>
+		<pre>
+			<code>
+	k1 = h * f_1(omega_1);
+        l1 = h * g_1(theta_1, theta_2, omega_1, omega_2);
+        p1 = h * f_2(omega_2);
+        q1 = h * g_2(theta_1, theta_2, omega_1, omega_2);
+        
+        k2 = h * f_1(omega_1 + (0.5 * l1));
+        l2 = h * g_1(theta_1 + (0.5 * k1), theta_2 + (0.5 * p1), omega_1 + (0.5 * l1), omega_2 + (0.5 * q1));
+        p2 = h * f_2(omega_2 + (0.5 * q1));
+        q2 = h * g_2(theta_1 + (0.5 * k1), theta_2 + (0.5 * p1), omega_1 + (0.5 * l1), omega_2 + (0.5 * q1));
+        
+        k3 = h * f_1(omega_1 + (0.5 * l2));
+        l3 = h * g_1(theta_1 + (0.5 * k2), theta_2 + (0.5 * p2), omega_1 + (0.5 * l2), omega_2 + (0.5 * q2));
+        p3 = h * f_2(omega_2 + (0.5 * q2));
+        q3 = h * g_2(theta_1 + (0.5 * k2), theta_2 + (0.5 * p2), omega_1 + (0.5 * l2), omega_2 + (0.5 * q2));
+        
+        k4 = h * f_1(omega_1 + l3);
+        l4 = h * g_1(theta_1 + k3, theta_2 + p3, omega_1 + l3, omega_2 + q3);
+        p4 = h * f_2(omega_2 + q3);
+        q4 = h * g_2(theta_1 + k3, theta_2 + p3, omega_1 + l3, omega_2 + q3);
+
+        theta_1 = theta_1 + (k1 + (2 * k2) + (2 * k3) + k4) / 6;
+        omega_1 = omega_1 + (l1 + (2 * l2) + (2 * l3) + l4) / 6;         
+        //Below two lines keep the theta_1 in range of -2PI to 2PI.
+        if(theta_1 > 2 * PI) theta_1 = theta_1 - (2 * PI);
+        if(theta_1 < -2 * PI) theta_1 = theta_1 + (2 * PI);
+        
+
+        theta_2 = theta_2 + (p1 + (2 * p2) + (2 * p3) + p4) / 6;
+        omega_2 = omega_2 + (q1 + (2 * q2) + (2 * q3) + q4) / 6;
+        //Below two lines keep the theta_2 in range of -2PI to 2PI.
+        if(theta_2 > 2 * PI) theta_2 = theta_2 - (2 * PI);
+        if(theta_2 < -2 * PI) theta_2 = theta_2 + (2 * PI);
+			</code>
+		</pre>
+	</p>
+</div>
+<p>Don't forget to convert <i>theta</i>s from radian to degree.</p>
+<div class = "divc">
+	<p>
+		<pre>
+			<code>
+pendulum1.angle = theta_1 * 180 / PI;
+pendulum2.angle = theta_2 * 180 / PI;
+			</code>
+		</pre>
+	</p>
+</div>
+<h1>7 Drawing The Scene</h1>
+<p>It's time to draw and run the double pendulum.</p>
+<div class = "divc">
+	<p>
+		<pre>
+			<code>
+	pendulum1.angle = theta_1 * 180 / PI; //converts theta_1 from radian to degree
+
+        //prepares to draw pendulum 1
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 projection = glm::mat4(1.0f);
+        glm::mat4 view = glm::mat4(1.0f);
+        view = glm::rotate(view, glm::radians(pendulum1.angle), glm::vec3(0.0f, 0.0f, 1.0f));
+        view = glm::translate(view, glm::vec3(0.0f, -0.4f, 0.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 1080);
+        glBindVertexArray(VAO2);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
+
+
+        pendulum2.angle = theta_2 * 180 / PI;
+
+        //prepares to draw pendulum 2
+        glm::mat4 model2 = glm::mat4(1.0f);
+        glm::mat4 projection2 = glm::mat4(1.0f);
+        glm::mat4 view2 = glm::mat4(1.0f);
+        view2 = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f)); //"view" parameter is here for binding the pendulum 2 to 1.
+        view2 = glm::rotate(view2, glm::radians(pendulum2.angle - pendulum1.angle), glm::vec3(0.0f, 0.0f, 1.0f));
+        
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection2));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view2));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model2));
+
+        glBindVertexArray(VAO3);
+        glDrawArrays(GL_TRIANGLES, 0, 1080);
+        glBindVertexArray(VAO4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 5);
+			</code>
+		</pre>
+	</p>
+	</div>
+<p>There are two important points to be careful about. First, we have to bind the lower pendulum (called pendulum 2 in the code) to the upper one. To do that, we put <b>"view"</b> matrix, not <b>"view2"</b>, to the <b>"glm::translate"</b> which we assign to <b>"view2"</b>, . The second one is that we have to subtract <i>pendulum1.angle</i> from <i>pendulum2.angle</i>. Because when pendulum1 rotates with an angle, it also rotates pendulum2. To avoid it, we do that subtraction.</p>
+	</div>
 	</body>
 </html>
